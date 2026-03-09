@@ -2,8 +2,8 @@
 
 # python filter_alex_1d_elemental.py \
 #   --dataset alex_pbe_1d_all \
-#   --store-dir "$SCRATCH/alex_pbe_1d_all_cache" \
-#   --outdir "$SCRATCH/alex_pbe_1d_all_elemental"
+#   --store-dir "./alex_pbe_1d_all_cache" \
+#   --outdir "./alex_pbe_1d_all_elemental"
 
 from __future__ import annotations
 
