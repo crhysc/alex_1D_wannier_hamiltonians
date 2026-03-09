@@ -55,7 +55,7 @@ def validate_record(entry: dict[str, Any], idx: int) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Download and store all structures from a JARVIS dataset."
+        description="Download, validate, and store all structures from a JARVIS dataset as JSONL."
     )
     parser.add_argument(
         "--dataset",
@@ -100,13 +100,15 @@ def main() -> None:
         info = validate_record(entry, idx)
         validation_log.append(info)
 
-    all_structures_json = outdir / f"{args.dataset}_all_structures.json"
+    all_structures_jsonl = outdir / f"{args.dataset}_all_structures.jsonl"
     all_jids_txt = outdir / "all_jids.txt"
     validation_json = outdir / "validation_summary.json"
     summary_json = outdir / "summary.json"
 
-    with all_structures_json.open("w") as f:
-        json.dump(records, f)
+    with all_structures_jsonl.open("w") as f:
+        for entry in records:
+            f.write(json.dumps(entry))
+            f.write("\n")
 
     with all_jids_txt.open("w") as f:
         for idx, entry in enumerate(records):
@@ -128,7 +130,7 @@ def main() -> None:
             sorted(species_histogram.items(), key=lambda kv: int(kv[0]))
         ),
         "output_files": {
-            "all_structures_json": str(all_structures_json),
+            "all_structures_jsonl": str(all_structures_jsonl),
             "all_jids_txt": str(all_jids_txt),
             "validation_json": str(validation_json),
             "summary_json": str(summary_json),
@@ -140,7 +142,7 @@ def main() -> None:
 
     print("\nDone.")
     print(f"Stored all records: {len(records)}")
-    print(f"Wrote: {all_structures_json}")
+    print(f"Wrote: {all_structures_jsonl}")
     print(f"Wrote: {all_jids_txt}")
     print(f"Wrote: {validation_json}")
     print(f"Wrote: {summary_json}")
