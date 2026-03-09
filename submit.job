@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#SBATCH --job-name=nanowire
+#SBATCH --ntasks-per-node=1             
+#SBATCH --cpus-per-task=16
+
+source ~/.bashrc
+eval "$(conda shell.bash hook)"
+conda activate jarvis
+module load cuda/11.8
+nvidia-smi
+
+export PRINT_STRUCTURES=1
+export AtomGPT_COMPILE_DISABLE=1
+export PYTHONUNBUFFERED=1
+export TQDM_MININTERVAL=0.1
+export TQDM_MINITERS=1
+export HF_HOME=/scratch/kchoudh2/$USER/hf_home
+export HUGGINGFACE_HUB_CACHE=/scratch/kchoudh2/$USER/hf_home/hub
+export TRANSFORMERS_CACHE=/scratch/kchoudh2/$USER/hf_home/transformers
+export HF_DATASETS_CACHE=/scratch/kchoudh2/$USER/hf_home/datasets
+export ATOMGPT_PATH=~/repositories/atomgpt_jhu
+
+echo "===== BEGIN BATCH SCRIPT: $0 ==="
+sed -n '1,99999p' "$0"
+echo "===== END BATCH SCRIPT ========="
+echo ""
+echo "===== BEGIN JOB METADATA ======="
+echo "Nodes:              ${SLURM_JOB_NUM_NODES}"
+echo "Tasks (ntasks):     ${SLURM_NTASKS:-1}"
+echo "CPUs per task:      ${SLURM_CPUS_PER_TASK:-1}"
+echo "CPUs per node:      ${SLURM_CPUS_ON_NODE:-unknown}"
+echo "Job CPUs/node map:  ${SLURM_JOB_CPUS_PER_NODE}"
+echo "GPUs (job):         ${SLURM_JOB_GPUS:-${SLURM_GPUS:-0}}"
+echo "GPUs per node:      ${SLURM_GPUS_PER_NODE}"
+echo "GPUs per task:      ${SLURM_GPUS_PER_TASK}"
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+echo "===== END JOB METADATA ========="
+echo ""
+echo "===== START COMPUTATION ========"
+python nanowire_tbmbj_dft.py submit \
+  --jsonl alex_pbe_1d_all_all_structures.jsonl \
+  --superdir ./nanowire_tbmbj_dataset \
+  --vasp-cmd "srun vasp_std" \
+  --queue normal \
+  --account my_account \
+  --cores 32 \
+  --memory 128G \
+  --walltime 24:00:00 \
+  --pre-job-lines $'module load vasp\nexport VASP_PSP_DIR=/potcars' \
+  --submit
+echo "===== JOB FINISHED ============="
