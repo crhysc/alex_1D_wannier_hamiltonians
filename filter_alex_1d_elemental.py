@@ -86,9 +86,16 @@ def main() -> None:
 
     outdir = Path(args.outdir).resolve()
     outdir.mkdir(parents=True, exist_ok=True)
-
+    
+    if args.store_dir is not None:
+        store_dir = Path(args.store_dir).resolve()
+        store_dir.mkdir(parents=True, exist_ok=True)
+        store_dir_str = str(store_dir)
+    else:
+        store_dir_str = None
+    
     print(f"Downloading/loading dataset: {args.dataset}")
-    records = data(args.dataset, store_dir=args.store_dir)
+    records = data(args.dataset, store_dir=store_dir_str)
     print(f"Total records loaded: {len(records)}")
 
     elemental_records = []
